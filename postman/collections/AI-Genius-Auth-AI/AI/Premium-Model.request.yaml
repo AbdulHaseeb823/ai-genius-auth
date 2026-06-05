@@ -1,0 +1,24 @@
+$kind: http-request
+name: Premium Model
+method: POST
+url: '{{baseUrl}}/api/ai/premium-model'
+order: 2000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{accessToken}}'
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: '{}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      const json = pm.response.json();
+      pm.test("Response has model field", () => pm.expect(json).to.have.property("model"));
+      pm.test("Model is premium version", () => pm.expect(json.model).to.eql("ai-genius-premium-v3"));

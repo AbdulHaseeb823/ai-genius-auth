@@ -1,0 +1,12 @@
+$kind: http-request
+name: Logout
+method: POST
+url: '{{baseUrl}}/api/auth/logout'
+order: 3000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      pm.collectionVariables.set("accessToken", "");
+      console.log("Logged out. Access token cleared.");

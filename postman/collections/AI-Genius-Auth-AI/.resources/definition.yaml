@@ -1,0 +1,17 @@
+$kind: collection
+name: AI-Genius Auth & AI
+description: |-
+  Collection for the AI-Genius SaaS platform covering Authentication (login, refresh, logout)
+  and AI model endpoints (free, premium, admin cache purge).
+
+  Test accounts:
+  - Admin:        admin@aigenius.com    / Admin@123
+  - Premium User: premium@aigenius.com  / Premium@123
+  - Free User:    free@aigenius.com     / Free@123
+variables:
+  - key: baseUrl
+    value: 'http://localhost:5000'
+    description: Base URL of the AI-Genius server
+  - key: accessToken
+    value: ''
+    description: JWT access token — populated automatically after Login

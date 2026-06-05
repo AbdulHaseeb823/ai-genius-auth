@@ -1,0 +1,27 @@
+$kind: http-request
+name: Login
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "admin@aigenius.com",
+      "password": "Admin@123"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const json = pm.response.json();
+      if (json.accessToken) {
+        pm.collectionVariables.set("accessToken", json.accessToken);
+        console.log("Access token saved:", json.accessToken.substring(0, 20) + "...");
+      }
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      pm.test("Response has accessToken", () => pm.expect(json).to.have.property("accessToken"));
+      pm.test("Response has user object", () => pm.expect(json).to.have.property("user"));

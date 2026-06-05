@@ -1,0 +1,18 @@
+$kind: http-request
+name: Purge Cache
+method: DELETE
+url: '{{baseUrl}}/api/ai/purge-cache'
+order: 3000
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{accessToken}}'
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Status is 200", () => pm.response.to.have.status(200));
+      const json = pm.response.json();
+      pm.test("Action is CACHE_PURGED", () => pm.expect(json.action).to.eql("CACHE_PURGED"));
+      pm.test("Response has timestamp", () => pm.expect(json).to.have.property("timestamp"));
