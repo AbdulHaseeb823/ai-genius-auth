@@ -1,0 +1,249 @@
+{
+  "info": {
+    "name": "AI-Genius Auth & RBAC",
+    "description": "Complete workflow: Login → Access Protected API → Token Expires → Refresh → Access Denied",
+    "_postman_id": "ai-genius-auth-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. AUTH",
+      "item": [
+        {
+          "name": "1.1 Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "    pm.collectionVariables.set('access_token', res.accessToken);",
+                  "    pm.test('Login successful', () => pm.response.to.have.status(200));",
+                  "    pm.test('Access token received', () => pm.expect(res.accessToken).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@aigenius.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "1.2 Login as Premium User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "    pm.collectionVariables.set('access_token', res.accessToken);",
+                  "    pm.test('Login successful', () => pm.response.to.have.status(200));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"premium@aigenius.com\",\n  \"password\": \"Premium@123\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "1.3 Login as Free User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "    pm.collectionVariables.set('access_token', res.accessToken);",
+                  "    pm.test('Login successful', () => pm.response.to.have.status(200));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"free@aigenius.com\",\n  \"password\": \"Free@123\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "1.4 Login - Invalid Credentials (401)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"hacker@evil.com\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "1.5 Refresh Access Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "    pm.collectionVariables.set('access_token', res.accessToken);",
+                  "    pm.test('New access token received', () => pm.expect(res.accessToken).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{base_url}}/api/auth/refresh"
+          }
+        },
+        {
+          "name": "1.6 Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{base_url}}/api/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. AI ENDPOINTS",
+      "item": [
+        {
+          "name": "2.1 Free Model - Any Logged-In User (200)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/ai/free-model"
+          }
+        },
+        {
+          "name": "2.2 Free Model - No Token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/ai/free-model"
+          }
+        },
+        {
+          "name": "2.3 Premium Model - Admin or Premium (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Write a haiku about machine learning\"\n}"
+            },
+            "url": "{{base_url}}/api/ai/premium-model"
+          }
+        },
+        {
+          "name": "2.4 Premium Model - Free User (403 Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/api/ai/premium-model"
+          }
+        },
+        {
+          "name": "2.5 Purge Cache - Admin Only (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/ai/purge-cache"
+          }
+        },
+        {
+          "name": "2.6 Purge Cache - Non-Admin (403 Forbidden)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/ai/purge-cache"
+          }
+        },
+        {
+          "name": "2.7 Malformed Token (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer this.is.a.fake.token"
+              }
+            ],
+            "url": "{{base_url}}/api/ai/free-model"
+          }
+        }
+      ]
+    }
+  ]
+}
